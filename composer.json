@@ -1,0 +1,23 @@
+{
+	"name":"older-w/laravel-restful-api-doc",
+	"description":"a tool for generate api document for laravel",
+	"keywords":["laravel","tools","resetful","document"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "coder5",
+			"email": "coder5@qq.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"OlderW\\RestfulDoc\\": "src/"
+		},
+		"files": [
+			"src/helpers.php"
+		]
+	},
+	"require": {
+		"laravel/framework": "^5.6"
+	}
+}
