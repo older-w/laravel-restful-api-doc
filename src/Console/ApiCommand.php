@@ -9,6 +9,7 @@
 namespace OlderW\RestfulDoc\Console;
 
 use Illuminate\Console\Command;
+use OlderW\RestfulDoc\RestfulDoc;
 
 
 class ApiCommand extends Command
@@ -18,13 +19,13 @@ class ApiCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'build:apidoc {type}';
+    protected $signature = 'build:apidoc {doc} {--publish}';
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '生成系统所用的文档';
+    protected $description = '生成系统所用的文档 type的取值为api或者error --publish 表示直接自动发布';
     /**
      * Create a new command instance.
      *
@@ -41,28 +42,41 @@ class ApiCommand extends Command
      */
     public function handle()
     {
-        $type = $this->argument('type');
+        $doc = $this->argument('doc');
+        $docs = config(RestfulDoc::$config_path.'.docs');
+        if (!isset($docs[$doc]))
+        {
+            die("您输入的文档类型".$doc."没有对应配置\n".
+                "目前系统仅仅配置了".implode(",",array($docs))."\n"
+                ."新的类型请在".RestfulDoc::$config_path."的.pusher.docs中进行配置\n");
+        }
+        $type = $docs[$doc]['type'];
+        $publish = $this->option('publish');
+        $marker = app('OlderW\RestfulDoc\DocMarker');
+        $data = '';
         switch ($type) {
-            case 'pushapi':
-                $this->pushApi();
-                break;
-            case 'pusherror':
-                $this->pushError();
-                break;
             case 'api':
-                echo DocMarker::getDoc();
+                $data = $marker::getDoc($docs[$doc]['path']);
                 break;
-            case 'backend':
-                echo DocMarker::getDoc('/app/Http/Controllers/Backend');
-                break;
-            case 'exception':
-                echo DocMarker::getExceptionDoc();
+            case 'error':
+                $data =  $marker::getExceptionDoc($docs[$doc]['path']);
                 break;
             case 'enum':
-                echo DocMarker::getEnumDoc();
+                $data =  $marker::getEnumDoc($docs[$doc]['path']);
                 break;
             default:
                 echo '请输入要生成的文件类型 api backend exception menu';
+        }
+        if (empty($data))
+        {
+            die("内如为空，请修正后发布\n");
+        }
+        if ($publish)
+        {
+            app('OlderW\RestfulDoc\Pusher\Wordpress')->push($doc,$data);
+        }
+        else{
+            echo $data;
         }
     }
 }

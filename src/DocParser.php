@@ -72,7 +72,7 @@ class DocParser
 
                 }
             }
-            if (DOC_VERSION)
+            if (0)
             {
                 if( isset($method_doc['version']) && $doc['version'] == DOC_VERSION)
                 {

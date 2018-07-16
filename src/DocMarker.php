@@ -22,7 +22,7 @@ class DocMarker
             /**
              * @var $route \Illuminate\Routing\Route::class;
              */
-            //print_r($route->getActionName());echo "--";exit;
+            //print_r($route->getActionName());echo "--";exitexit;
             //print_r($route->getAction());
 
             $action = $route->getActionName();
@@ -56,18 +56,18 @@ class DocMarker
         if (count($result)>1)
         {
             print_r($result);
-            echo $class.' '.$method.'存在多个对应';
+            echo $class.' '.$method.'存在多个对应路由';
             exit();
         }
         if (count($result) == 0)
         {
-            die($class.' '.$method.' 找不到对应');
+            die($class.' '.$method.' 找不到对应路由');
         }
         return $result[0];
 
     }
 
-    public static function getEnumDoc($path = '/app/Enum')
+    public static function getEnumDoc($path = '/app/Enum',$base_class='\App\Http\Enum')
     {
         $classes = self::get_classes([
             base_path() . $path,
@@ -76,6 +76,10 @@ class DocMarker
         sort($classes);
         foreach ($classes as $class) {
             if (!$doc = DocParser::get_classes_commentdoc($class)) {
+                continue;
+            }
+            if (!is_subclass_of($class,$base_class))
+            {
                 continue;
             }
             if (isset($doc['ignore']))
@@ -89,35 +93,30 @@ class DocMarker
             $data = DocParser::get_class_const_commentdoc($class);
             $docs[] = ['data'=>$data,'intro'=>$doc['intro'],'class'=>$class];
         }
-        self::to_menu_markdown($docs);
+        return app('OlderW\RestfulDoc\DocFormat')::Enum_markdown($docs);
     }
-    public static function to_menu_markdown($docs)
-    {
-        foreach ($docs as $doc)
-        {
-            echo $doc['intro']."\n";
-            echo "```\n";
-            foreach ($doc['data'] as $val => $comment)
-            {
-                echo $val."    ".$comment."\n";
-            }
-            echo "```\n";
-        }
-    }
+
     /**
      * 生成api文档
      */
-    public static function getDoc($path = '/app/Http/Controllers/Api')
+    public static function getDoc($path = '/app/Http/Controllers/Api',$base_class = '\App\Http\Controllers\Api')
     {
 
-
-        $classes = self::get_classes([
-            base_path() . $path,
-        ]);
+        if (is_string($path))
+        {
+            $path = [$path];
+        }
+        $classes = [];
+        foreach ($path as $p)
+        {
+            $classes = array_merge($classes, self::get_classes([
+                base_path() . $p,
+            ]));
+        }
         $docs = [];
         sort($classes);
         foreach ($classes as $class) {
-            if (!is_subclass_of($class,ApiController::class))
+            if (!is_subclass_of($class,$base_class))
             {
                 continue;
             }
@@ -136,106 +135,31 @@ class DocMarker
             if (!isset($docs[$module])) {
                 $docs[$module] = [];
             }
-            //echo get_class(app('url'));exit;
             if ($motheds = DocParser::getMethodDocForClass($class))
             {
                 if (!is_array($motheds))
                 {
                     print_r($motheds);die('date error!!');
                 }
-                foreach ($motheds as $method => $method_doc) {//print_r($method_doc);exit;
-                    //app('url')->route($name, $parameters, $absolute);
-//                $url = route($method_doc['route']);
-//                $url = (parse_url($url));
-//                $path = $url['path'];
-//                $method = self::getMotehd($method);
-//                $api = sprintf('%s %s', $method, $path);
-                    //$api = $method_doc['route'];
+                foreach ($motheds as $method => $method_doc) {
                     $uri = self::getUri($class,$method);
-//                    if ($uri['method'].' '.$uri['uri']!=$method_doc['route'])
-//                    {
-//                        die($uri['method'].' '.$uri['uri'].'----------'.$method_doc['route']);
-//                    }
-
                     $docs[$module][$uri['method'].' '.$uri['uri']] = $method_doc;
-                    //break;
+
                 }
             }
 
 
         }
-        return self::to_doc_markdown($docs);
-    }
-    public static function getMotehd($m)
-    {
-        if ($m == 'store')
-        {
-            return 'POST';
-        }elseif ($m =='update')
-        {
-            return 'PUT';
-        }elseif ($m =='show')
-        {
-            return 'GET';
-        }
-        return $m;
+
+        return app('OlderW\RestfulDoc\DocFormat')::api_markdown($docs);
     }
 
-    public static function to_doc_markdown($docs)
-    {
-        $toc = [];
-        $line =[];
-        ob_start();
-        foreach ($docs as $module=>$apis)
-        {
 
-            $toc[] = "\n".'['.$module.'](#'.$module.')'."\n\n |  |\n | ------------------------ |";
-            $line[] = '<br><br>';
-            $line[] ="### <div id='".$module."'  style='border: 1px solid #ddd;padding: 6px 13px;background: #0088cc;color:#fff'>".$module."</div>";
-            //$line[] = '---';
 
-            foreach ($apis as $url =>$doc)
-            {
-
-                $anchor = str_replace(' ','',$url);
-                $toc[] ='| ['.$doc['intro'].'](#'.$anchor.') |';
-                $line[] = "### <span id='".$anchor."'>".$url." ".$doc['intro']."</span>";
-                if (isset($doc['desc']))
-                {
-                    $line[] = $doc['desc'];
-                }
-                $line[] =  "```";
-                $line[] =  "request\n".$doc['request'];
-                $line[] =  "response\n".$doc['response'];
-                if (isset($doc['errors']))
-                {
-                    $err_str = [];
-                    foreach ($doc['errors'] as $error)
-                    {
-                        $err_str[] = '    '.$error['code'].'     '.$error['message'];
-                    }
-                    $line[] =  "throws\n{\n".implode("\n",$err_str)."\n}\n";
-                }
-                //print_r($doc);exit;
-                $line[] =  "```";
-            }
-
-        }
-        //print_r($toc);exit;
-        //$toc = ;
-        print_r(implode("\n",$toc));
-        echo "\n\n---\n\n";
-        print_r(implode("\n",$line));
-        //exit;
-        //exit;
-        $out1 = ob_get_contents();
-        ob_end_clean();
-        return $out1;
-    }
-    public static function getExceptionDoc()
+    public static function getExceptionDoc($path= '/app/Exceptions',$base_class='\App\Http\Exception')
     {
         $classes = self::get_classes([
-            base_path() . '/app/Exceptions',
+            base_path() . $path,
             //other root
         ]);
         $docs = [];//print_r($classes);\Symfony\Component\HttpKernel\Exception\HttpException::class;
@@ -244,7 +168,7 @@ class DocMarker
             if (substr($class, -9) !== 'Exception') {
                 continue;
             }
-            if ($class == Exception::class)
+            if (!is_subclass_of($class,$base_class))
             {
                 continue;
             }
@@ -275,6 +199,10 @@ class DocMarker
                     //die("{$class} {$doc['name']} 缺少 @errno 注释\n");
                 }
             }
+            if (!isset($doc['errno']))
+            {
+                die(" {$doc['name']}中的错误码 无法读取 errno \n");
+            }
             if (isset($errnoList[$doc['errno']]) && $doc['errno'] != 500000) {
                 //@todo容错处理
 
@@ -285,22 +213,14 @@ class DocMarker
             $docs[] = $doc;
         }
 
-        return self::to_exec_markdown($docs);
+        return app('OlderW\RestfulDoc\DocFormat')::exec_markdown($docs);
 
     }
-    public static function to_exec_markdown($docs)
-    {
-        $str = "## 错误码说明\n";
-        array_multisort(array_column($docs,'errno'),SORT_DESC,$docs);
-        foreach ($docs as $doc)
-        {
-            $str.= '- '.$doc['errno'].' '.$doc['error']."\n";
-        }
-        return $str;
-    }
+
 
     public static function get_classes($directory)
     {
+
         $classes = get_declared_classes();
         self::include_classes($directory);
 
@@ -311,6 +231,10 @@ class DocMarker
         $directories = (array) $directories;
         foreach ($directories as $directory)
         {
+            if (!is_dir($directory))
+            {
+                continue;
+            }
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory));
 
             foreach ($it as $o) {
