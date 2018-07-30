@@ -30,6 +30,8 @@ return [
      * 定义处理格式化的类
      */
     'formatter' =>'OlderW\RestfulDoc\DocFormat',
+
+    'maker'=>'OlderW\RestfulDoc\DocMarker',
     /**
      * 定义各个文档类型
      */

@@ -60,7 +60,7 @@ class ApiCommand extends Command
         }
         $type = $docs[$doc]['type'];
         $publish = $this->option('publish');
-        $marker = app(config(RestfulDoc::$config_path.'.formatter'));
+        $marker = app(config(RestfulDoc::$config_path.'.maker'));
         $data = '';
         switch ($type) {
             case 'api':
