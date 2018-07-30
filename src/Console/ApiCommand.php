@@ -64,13 +64,13 @@ class ApiCommand extends Command
         $data = '';
         switch ($type) {
             case 'api':
-                $data = $marker::getDoc($docs[$doc]['path']);
+                $data = $marker::getDoc($docs[$doc]['path'],$docs[$doc]['base_class']);
                 break;
             case 'error':
-                $data =  $marker::getExceptionDoc($docs[$doc]['path']);
+                $data =  $marker::getExceptionDoc($docs[$doc]['path'],$docs[$doc]['base_class']);
                 break;
             case 'enum':
-                $data =  $marker::getEnumDoc($docs[$doc]['path']);
+                $data =  $marker::getEnumDoc($docs[$doc]['path'],$docs[$doc]['base_class']);
                 break;
             default:
                 echo '请输入要生成的文件类型 api backend exception menu';
