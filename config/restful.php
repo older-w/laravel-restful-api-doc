@@ -27,6 +27,10 @@ return [
      */
     'publisher' =>'OlderW\RestfulDoc\Pusher\Wordpress',
     /**
+     * 定义处理格式化的类
+     */
+    'formatter' =>'OlderW\RestfulDoc\DocFormat',
+    /**
      * 定义各个文档类型
      */
     'docs'=>[

@@ -93,7 +93,7 @@ class DocMarker
             $data = DocParser::get_class_const_commentdoc($class);
             $docs[] = ['data'=>$data,'intro'=>$doc['intro'],'class'=>$class];
         }
-        return app('OlderW\RestfulDoc\DocFormat')::Enum_markdown($docs);
+        return app(config(RestfulDoc::$config_path.'.formatter'))::Enum_markdown($docs);
     }
 
     /**
@@ -151,7 +151,7 @@ class DocMarker
 
         }
 
-        return app('OlderW\RestfulDoc\DocFormat')::api_markdown($docs);
+        return app(config(RestfulDoc::$config_path.'.formatter'))::api_markdown($docs);
     }
 
 
@@ -213,7 +213,7 @@ class DocMarker
             $docs[] = $doc;
         }
 
-        return app('OlderW\RestfulDoc\DocFormat')::exec_markdown($docs);
+        return app(config(RestfulDoc::$config_path.'.formatter'))::exec_markdown($docs);
 
     }
 

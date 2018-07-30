@@ -60,7 +60,7 @@ class ApiCommand extends Command
         }
         $type = $docs[$doc]['type'];
         $publish = $this->option('publish');
-        $marker = app('OlderW\RestfulDoc\DocMarker');
+        $marker = app(config(RestfulDoc::$config_path.'.formatter'));
         $data = '';
         switch ($type) {
             case 'api':
@@ -81,7 +81,7 @@ class ApiCommand extends Command
         }
         if ($publish)
         {
-            app('OlderW\RestfulDoc\Pusher\Wordpress')->push($doc,$data);
+            app(config(RestfulDoc::$config_path.'.publisher'))->push($doc,$data);
         }
         else{
             echo $data;
