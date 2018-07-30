@@ -46,9 +46,17 @@ class ApiCommand extends Command
         $docs = config(RestfulDoc::$config_path.'.docs');
         if (!isset($docs[$doc]))
         {
-            die("您输入的文档类型".$doc."没有对应配置\n".
-                "目前系统仅仅配置了".implode(",",array($docs))."\n"
-                ."新的类型请在".RestfulDoc::$config_path."的.pusher.docs中进行配置\n");
+            if(empty($docs))
+            {
+                die("目前系统中没有任何配置，请修改 config/".RestfulDoc::$config_path.".php\n"
+                    ."初次安装，请执行 php artisan vendor:publish  --provider=\"OlderW\RestfulDoc\RestfulServiceProvider\"\n"
+                );
+            }
+            else {
+                die("您输入的文档类型" . $doc . "没有对应配置\n" .
+                    "目前系统仅仅配置了" . implode(",", array_keys($docs)) . "\n"
+                    . "新的类型请在" . RestfulDoc::$config_path . "的.pusher.docs中进行配置\n");
+            }
         }
         $type = $docs[$doc]['type'];
         $publish = $this->option('publish');

@@ -7,11 +7,14 @@
  */
 
 return [
+    /**
+     * 定义发布方式和参数
+     */
     'pusher'=>[
         'wordpress'=>[
-            'key'=>'7358812c1388060212389866d5ea9f31',
+            'key'=>'key',
             'user_id'=>'60',
-            'url'=>'https://doc.wangxutech.com/wp-admin/admin-ajax.php?action=edit_api',
+            'url'=>'https://doc.com/wp-admin/admin-ajax.php?action=edit_api',
             'docs'=>[
                 'api'=>['id'=>638],
                 'error'=>['id'=>638],
@@ -19,6 +22,13 @@ return [
             ]
         ]
     ],
+    /**
+     * 定义采用的发布方式
+     */
+    'publisher' =>'OlderW\RestfulDoc\Pusher\Wordpress',
+    /**
+     * 定义各个文档类型
+     */
     'docs'=>[
         'api'=>[
             'path'=>'/app/Http/Controllers/Api',
@@ -35,5 +45,6 @@ return [
             'base_class'=>\App\Http\Controllers\Api::class,
             'type'=>'enum'
         ],
-    ]
+    ],
+
 ];
